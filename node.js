@@ -20,20 +20,21 @@ const gameboard = (() => {
     const getboard = () => board;
     return {getboard};
 })();
-
+console.log(gameboard.getboard());
 //factory function for players
 function playing() {
+    
     let updateboard = gameboard.getboard();
     const tiles = document.querySelectorAll('.tile');
     const tilesArr = Array.from(tiles);
 
     players = [
         {
-            name: "playerOne",
+            name: "Player One",
             marker: 'X'
         },
         {
-            name: "playerTwo",
+            name: "Player Two",
             marker: 'O'
         }
     ];
@@ -49,19 +50,15 @@ function playing() {
         console.log(activePlayer);
     };
 
-    const getActivePlayer = () => activePlayer;
-
-    const checkinner = (r, c) => {
-        if(updateboard[r][c] != 0){
-            if(updateboard[0][1] === update)
-        }
-        
+    const getActivePlayer = () => {
+        const turn = document.querySelector('.playerTurn');
+        turn.textContent = `${activePlayer.name}'s turn`;
     }
 
     const playRound = (i) => {
-        let theTile = tilesArr.find(({id}) => id === i);
-        let coords = i.split("-");
-        let r = parseInt(coords[0]);
+        let theTile = tilesArr.find(({id}) => id === i); //gets the specific tiles information in object form
+        let coords = i.split("-"); //turns the id of the element into an array without the dash
+        let r = parseInt(coords[0]); 
         let c = parseInt(coords[1]);
         if (activePlayer === players[0]) {
             if (updateboard[r][c] === 0){
@@ -78,24 +75,54 @@ function playing() {
                 swtichPlayer();
             }
         }
-        winner(r, c);
+        checkWinner(r, c);
     };
 
-    
+    const checkWinner = (r, c) => {
+        if(updateboard[r][c] !== 0){
+            //checks horizontally
+            if(updateboard[r][0] === updateboard[r][1] && updateboard[r][1] === updateboard[r][2]){
+                gameOver();
+                return
+            }
+            //checks vertically
+            if(updateboard[0][c] === updateboard[1][c] && updateboard[1][c] === updateboard[2][c]){
+                gameOver();
+                return
+            }
+            //checks diagnally decending
+            if(updateboard[0][0] !== 0 && updateboard[0][0] === updateboard[1][1] && updateboard[1][1] === updateboard[2][2]){
+                gameOver();
+                return
+            }
+             //checks diagnally rising
+             if(updateboard[2][0] !== 0 && updateboard[2][0] === updateboard[1][1] && updateboard[1][1] === updateboard[0][2]){
+                gameOver();
+                return
+            }
+        }
+    }
+
+    const gameOver = () => {
+        console.log("over");
+    }
 
     return {getActivePlayer, playRound};  
 };
 
 function updateGame() {
     const checkGame = playing();
-    
+    checkGame.getActivePlayer();
     const tiles = document.querySelectorAll('.tile');
     tiles.forEach((tile) => {
         tile.addEventListener('click', () => {
+            //gets id of the tile that was clicked on
             let id = tile.id;
             checkGame.playRound(id);
+            checkGame.getActivePlayer();
         });
     });
 };
 
 updateGame();
+//make the game over function stop player from beign able to play the game
