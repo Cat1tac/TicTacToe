@@ -1,54 +1,39 @@
-const tiles = (() => {
-    let value = 0;
-
-    const addMarker = (player) => {
-        value = player;
-    };
-
-    const getValue = () => value;
-
-    return {addMarker, getValue}
-})();
-
 //Module for gameboard
 const gameboard = (() => {
-    const tileboard = document.querySelectorAll('.tile');
-    tileboard.forEach((tile) => {
-        tile.addEventListener('click', () => {
-            tile.classList.add('xtile');
-            console.log(tileboard);
-        });
-    });
-
     const rows = 3;
     const columns = 3
     let board = [];
-    for (let i = 0; i < rows; i++){
-        board[i] = [];
-        for (let j = 0; j < columns; j++) {
-            board[i].push(tiles.getValue());
-            tileboard[i] = tiles.getValue;
+    for (let r = 0; r < rows; r++){
+        let row = [];
+        for (let c = 0; c < columns; c++) {
+            row.push(0);
+ 
+            const tile = document.createElement('div');
+            //allows the html to correspond with the js
+            tile.id = r.toString() + '-' + c.toString();
+            tile.classList.add('tile');
+            document.querySelector(".gameboard").append(tile);
         }
+        board.push(row);
     }
 
     const getboard = () => board;
-
-    
-
     return {getboard};
 })();
 
-console.log(gameboard.getboard());
-
 //factory function for players
-const controllers = (playerOne, playerTwo) => {
+function playing() {
+    let updateboard = gameboard.getboard();
+    const tiles = document.querySelectorAll('.tile');
+    const tilesArr = Array.from(tiles);
+
     players = [
         {
-            name: playerOne,
+            name: "playerOne",
             marker: 'X'
         },
         {
-            name: playerTwo,
+            name: "playerTwo",
             marker: 'O'
         }
     ];
@@ -61,15 +46,56 @@ const controllers = (playerOne, playerTwo) => {
         } else {
             activePlayer = players[0];
         }
+        console.log(activePlayer);
     };
 
     const getActivePlayer = () => activePlayer;
 
-    return {};  
+    const checkinner = (r, c) => {
+        if(updateboard[r][c] != 0){
+            if(updateboard[0][1] === update)
+        }
+        
+    }
+
+    const playRound = (i) => {
+        let theTile = tilesArr.find(({id}) => id === i);
+        let coords = i.split("-");
+        let r = parseInt(coords[0]);
+        let c = parseInt(coords[1]);
+        if (activePlayer === players[0]) {
+            if (updateboard[r][c] === 0){
+                updateboard[r][c] = players[0].marker;
+                theTile.classList.add('xtile');
+                console.log(updateboard);
+                swtichPlayer();
+            }
+        } else {
+            if (updateboard[r][c] === 0){
+                updateboard[r][c] = players[1].marker;
+                console.log(updateboard);
+                theTile.classList.add('otile');
+                swtichPlayer();
+            }
+        }
+        winner(r, c);
+    };
+
+    
+
+    return {getActivePlayer, playRound};  
 };
 
-//module for updating game state
-const updateGame = (() => {
+function updateGame() {
+    const checkGame = playing();
     
-    return {};
-})();
+    const tiles = document.querySelectorAll('.tile');
+    tiles.forEach((tile) => {
+        tile.addEventListener('click', () => {
+            let id = tile.id;
+            checkGame.playRound(id);
+        });
+    });
+};
+
+updateGame();
