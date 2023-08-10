@@ -23,7 +23,7 @@ const gameboard = (() => {
 
 //factory function for players
 function playing() {
-    let updateboard = gameboard.getboard();
+    const updateboard = gameboard.getboard();
     const tiles = document.querySelectorAll('.tile');
     const tilesArr = Array.from(tiles);
     const turn = document.querySelector('.playerTurn');
@@ -90,6 +90,7 @@ function playing() {
                     
                 }
             }
+            console.log(updateboard);
         }
     };
 
@@ -141,7 +142,23 @@ function playing() {
         console.log("over");
     }
 
-    return {getActivePlayer, playRound};  
+    const resetGame = () => {
+        return function() {
+            for(let r = 0; r < 3; r++){
+                for(let c = 0; c < 3; c++){
+                    updateboard[r][c] = 0;
+                }
+            }
+            tiles.forEach((tile) => {
+                tile.classList.remove('xtile');
+                tile.classList.remove('otile');
+            });
+    
+            activePlayer = players[0];
+        }
+    }
+
+    return {getActivePlayer, playRound, resetGame};  
 };
 
 function updateGame() {
@@ -163,7 +180,8 @@ function updateGame() {
         tile.addEventListener('click', onClick(tile));
     });
 
-    return {onClick};
+    const reset = document.querySelector('.reset');
+    reset.addEventListener('click', checkGame.resetGame());
 };
 
 updateGame();
