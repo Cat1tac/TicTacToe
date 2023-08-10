@@ -20,13 +20,16 @@ const gameboard = (() => {
     const getboard = () => board;
     return {getboard};
 })();
-console.log(gameboard.getboard());
+
 //factory function for players
 function playing() {
-    
     let updateboard = gameboard.getboard();
     const tiles = document.querySelectorAll('.tile');
     const tilesArr = Array.from(tiles);
+    const turn = document.querySelector('.playerTurn');
+    let over = false;
+    let gameOverCalled = false;
+    let spaces = 0;
 
     players = [
         {
@@ -51,59 +54,90 @@ function playing() {
     };
 
     const getActivePlayer = () => {
-        const turn = document.querySelector('.playerTurn');
-        turn.textContent = `${activePlayer.name}'s turn`;
+        over ? gameOver() : turn.textContent = `${activePlayer.name}'s turn`;
     }
 
     const playRound = (i) => {
-        let theTile = tilesArr.find(({id}) => id === i); //gets the specific tiles information in object form
-        let coords = i.split("-"); //turns the id of the element into an array without the dash
-        let r = parseInt(coords[0]); 
-        let c = parseInt(coords[1]);
-        if (activePlayer === players[0]) {
-            if (updateboard[r][c] === 0){
-                updateboard[r][c] = players[0].marker;
-                theTile.classList.add('xtile');
-                console.log(updateboard);
-                swtichPlayer();
-            }
+        if (gameOverCalled) {
+            return
         } else {
-            if (updateboard[r][c] === 0){
-                updateboard[r][c] = players[1].marker;
-                console.log(updateboard);
-                theTile.classList.add('otile');
-                swtichPlayer();
+            let theTile = tilesArr.find(({id}) => id === i); //gets the specific tiles information in object form
+            let coords = i.split("-"); //turns the id of the element into an array without the dash
+            let r = parseInt(coords[0]); 
+            let c = parseInt(coords[1]);
+            if (activePlayer === players[0]) {
+                if (updateboard[r][c] === 0){
+                    updateboard[r][c] = players[0].marker;
+                    theTile.classList.add('xtile');
+                    checkWinner(r, c);
+                    if(over){
+                        return
+                    } else {
+                        swtichPlayer();
+                    }
+                }
+            } else {
+                if (updateboard[r][c] === 0){
+                    updateboard[r][c] = players[1].marker;
+                    theTile.classList.add('otile');
+                    checkWinner(r, c);
+                    
+                    if(over){
+                        return;
+                    } else {
+                        swtichPlayer();
+                    }
+                    
+                }
             }
         }
-        checkWinner(r, c);
     };
 
     const checkWinner = (r, c) => {
         if(updateboard[r][c] !== 0){
             //checks horizontally
             if(updateboard[r][0] === updateboard[r][1] && updateboard[r][1] === updateboard[r][2]){
-                gameOver();
+                over = true;
                 return
             }
             //checks vertically
             if(updateboard[0][c] === updateboard[1][c] && updateboard[1][c] === updateboard[2][c]){
-                gameOver();
+                over = true;
                 return
             }
             //checks diagnally decending
             if(updateboard[0][0] !== 0 && updateboard[0][0] === updateboard[1][1] && updateboard[1][1] === updateboard[2][2]){
-                gameOver();
+                over = true;
                 return
             }
              //checks diagnally rising
              if(updateboard[2][0] !== 0 && updateboard[2][0] === updateboard[1][1] && updateboard[1][1] === updateboard[0][2]){
-                gameOver();
+                over = true;
                 return
             }
+        }
+        //check draw
+        spaces = 9;
+        
+        for(let r = 0; r < 3; r++){
+            for(let c = 0; c < 3; c++){
+                if(updateboard[r][c] !== 0){
+                    spaces--;
+                }
+            }
+        }
+        if (spaces === 0){
+            over = true;
         }
     }
 
     const gameOver = () => {
+        gameOverCalled = true; 
+        if (spaces === 0){
+            turn.textContent = `Draw`;
+        } else {
+            turn.textContent = `${activePlayer.name} wins!`;
+        }
         console.log("over");
     }
 
@@ -114,14 +148,22 @@ function updateGame() {
     const checkGame = playing();
     checkGame.getActivePlayer();
     const tiles = document.querySelectorAll('.tile');
-    tiles.forEach((tile) => {
-        tile.addEventListener('click', () => {
+    //keeping this function here for future reference 
+    const onClick = (tile) => {
+        //Must call function like this or else it will fire immediately
+        return function() {
             //gets id of the tile that was clicked on
             let id = tile.id;
             checkGame.playRound(id);
             checkGame.getActivePlayer();
-        });
+        }
+        
+    }
+    tiles.forEach((tile) => {
+        tile.addEventListener('click', onClick(tile));
     });
+
+    return {onClick};
 };
 
 updateGame();
