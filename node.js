@@ -155,6 +155,10 @@ function playing() {
             });
     
             activePlayer = players[0];
+            over = false;
+            gameOverCalled = false;
+            spaces = 0;
+            getActivePlayer();
         }
     }
 
